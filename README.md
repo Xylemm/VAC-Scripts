@@ -10,7 +10,7 @@ How to use the voicepack:
 1. Download the zip of this repo
 2. Unzip into your local mods folder
 3. Right click on each .ps1 file and select "Run with Powershell". This generates all of the SoundDefs and VoicePackDefs you need to run my voicepack.
-4. Activate Voice-Acted Colonist: Icewind Dale in your Rimworld game to try out the voicepack
+4. Activate Voice-Acted Colonists: Icewind Dale in your Rimworld game to try out the voicepack
 
 How to use it with your own voicepack:
 -
