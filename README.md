@@ -9,7 +9,7 @@ How to use the voicepack:
 -
 1. Download the zip of this repo
 2. Unzip into your local mods folder
-3. Right click on each .ps1 file and select "Run with Powershell". This generates all of the SoundDefs and VoicePackDefs you need to run my voicepack.
+3. Double click "GenerateDefs.bat". This generates all of the SoundDefs and VoicePackDefs you need to run my voicepack.
 4. Activate Voice-Acted Colonists: Icewind Dale in your Rimworld game to try out the voicepack
 
 How to use it with your own voicepack:
@@ -18,7 +18,7 @@ How to use it with your own voicepack:
 2. Sounds/VAC/IcewindDale is the project folder. Name your project folder whatever you like.
 3. Put your voices in the Male and Female folders
 4. Put your sound files in Attack, Select, Move, Downed, and Death folders
-5. With both of the .ps1 files in the root mod directory, right click and select "Run with Powershell". This automatically generates all of the SoundDefs and VoicePackDefs for your mod.
+5. Double click "GenerateDefs.bat". This automatically generates all of the SoundDefs and VoicePackDefs for your mod.
 
 Here's how it works (and doesn't work):
 -
