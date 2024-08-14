@@ -1,9 +1,9 @@
 # VAC-Scripts
 Voice-Acted Colonists (Scripts for Modders)
 
-This is a tool modders can use to help them build new voicepacks for the Voice-Acted Colonists Rimworld mod
+This is a set of tools modders can use to help them build new voicepacks for the Voice-Acted Colonists Rimworld mod
 
-It includes my Icewind Dale voicepack to use as a template
+It includes my Icewind Dale voicepack as an example
 
 How to use the voicepack:
 -
@@ -14,8 +14,8 @@ How to use the voicepack:
 
 How to use it with your own voicepack:
 -
-1. Your file structure MUST be the same as this voicepack. This is also the same structure as Alexis Popcorn's DirtyBomb voicepack.
-2. Sounds/VAC/IcewindDale is the project folder. Name your project folder whatever you like.
+1. Your file structure MUST be the same as this voicepack. This is also the same structure as the DirtyBomb voicepack.
+2. Sounds/VAC/Project is the project folder. Name your project folder whatever you like.
 3. Put your voices in the Male and Female folders
 4. Put your sound files in Attack, Select, Move, Downed, and Death folders
 5. Double click "GenerateDefs.bat". This automatically generates all of the SoundDefs and VoicePackDefs for your mod.
