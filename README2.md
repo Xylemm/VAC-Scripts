@@ -1,4 +1,4 @@
-#Voice Line Renamer
+# Voice Line Renamer
 
 When working with voice lines, you will often have folders filled with hundreds of unlabeled audio files. It can be very tedious to listen to each one before sorting them into the approriate folder.
 
