@@ -19,6 +19,7 @@ How to use it with your own voicepack:
 3. Put your voices in the Male and Female folders
 4. Put your sound files in Attack, Select, Move, Downed, and Death folders
 5. Double click "GenerateDefs.bat". This automatically generates all of the SoundDefs and VoicePackDefs for your mod.
+6. Make sure you delete the .bat and .ps1 files before uploading your voicepack to Steam
 
 Here's how it works (and doesn't work):
 -
