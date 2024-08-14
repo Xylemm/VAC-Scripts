@@ -21,6 +21,8 @@ Place the contents of the "Renamer" folder in the folder which contains Faster-W
 
 Copy your voice line audio files into the RenameThese folder
 
+Make sure you close any audio players or anything that might be using these files
+
 Run "Renamer.bat"
 
 This will rename and convert all audio files in the Transcribe folder and any subfolders within it
