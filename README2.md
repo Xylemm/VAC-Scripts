@@ -29,4 +29,4 @@ This will rename and convert all audio files in the Transcribe folder and any su
 
 Audio files that are shorter than one or two seconds, as well as some files that only contain grunts but no actual words, will be renamed with a number (1.ogg, 2.ogg, etc)
 
-If you have an Nvidia GPU, Whisper will use it to process your files very quickly. However, AMD GPUs are not supported. If you have an AMD GPU, your CPU will be used instead. With my CPU (i9 12900K), this will process about 10-15 voice lines per minute.
+If you have an Nvidia GPU, Whisper will use it to process your files very quickly. However, AMD GPUs are not supported. If you have an AMD GPU, your CPU will be used instead. With my CPU (i9 12900K), this will process about 70 voice lines per minute.
