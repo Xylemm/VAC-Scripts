@@ -8,9 +8,9 @@ Now you can quickly look over your list of files and move them to the correct fo
 
 At the same time, it will convert the files to .ogg format to reduce file sizes without losing quality. It will also normalize the volume so it isn't too loud or too soft.
 
-How to use it
--
-
+<details>
+<summary><h2>How to use it</h2></summary>
+ -
 First, you'll need to download a specific version of Whisper: https://github.com/Purfview/whisper-standalone-win
 
 Be aware that this download is over 1GB compressed, and almost 4GB when unzipped
@@ -30,3 +30,4 @@ This will rename and convert all audio files in the Transcribe folder and any su
 Audio files that are shorter than one or two seconds, as well as some files that only contain grunts but no actual words, will be renamed with a number (1.ogg, 2.ogg, etc)
 
 If you have an Nvidia GPU, Whisper will use it to process your files very quickly. However, AMD GPUs are not supported. If you have an AMD GPU, your CPU will be used instead. With my CPU (i9 12900K), this will process about 70 voice lines per minute.
+</details>
