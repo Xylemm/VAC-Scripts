@@ -1,0 +1,60 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20240815105213
+Username: LOOKING_GLASS\franc
+RunAs User: LOOKING_GLASS\franc
+Configuration Name: 
+Machine: LOOKING_GLASS (Microsoft Windows NT 10.0.22631.0)
+Host Application: powershell.exe -ExecutionPolicy Bypass -File Transcribe.ps1
+Process ID: 77524
+PSVersion: 5.1.22621.3880
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.22621.3880
+BuildVersion: 10.0.22621.3880
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is log3.txt
+All output being saved to transcription_rename_log.txt
+Processing directory: .\RenameThese
+Creating directory: .\RenameThese\Transcription
+
+
+    Directory: C:\Users\franc\OneDrive\Documents\GitHub\VAC-Scripts\RenameAudio\RenameThese
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         8/15/2024  10:52 AM                Transcription
+Starting transcription in directory: .\RenameThese...
+& : The term '.\faster-whisper-xxl.exe' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At C:\Users\franc\OneDrive\Documents\GitHub\VAC-Scripts\RenameAudio\Transcribe.ps1:29 char:7
++     & $whisperPath --beep_off --output_format txt --language=en --mod ...
++       ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.\faster-whisper-xxl.exe:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+& : The term '.\faster-whisper-xxl.exe' is not recognized as the name of a cmdlet, function, script file, or operable
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At C:\Users\franc\OneDrive\Documents\GitHub\VAC-Scripts\RenameAudio\Transcribe.ps1:29 char:7
++     & $whisperPath --beep_off --output_format txt --language=en --mod ...
++       ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.\faster-whisper-xxl.exe:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+Transcription completed in directory: .\RenameThese.
+Deleting folder: .\RenameThese\Transcription
+Folder deleted.
+Completed processing for directory: .\RenameThese.
+
+####################################################
+
+All audio files transcribed and renamed.
+
+####################################################
+**********************
+Windows PowerShell transcript end
+End time: 20240815105213
+**********************

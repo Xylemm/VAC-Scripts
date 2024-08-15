@@ -1,17 +1,54 @@
-﻿Start-Transcript -Path "log.txt"
+﻿# Define the log file path
+$logFilePath = "RenameAudio.log"
 
-Write-Host "All output being saved to log.txt"
+# Define a logging function
+function Write-Log {
+    param (
+        [string]$Message
+    )
+    
+    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+    "$timestamp - $Message" | Out-File -FilePath $logFilePath -Append
+}
+
+Write-Log "Starting script execution"
 
 # Define paths
 $rootPath = ".\RenameThese"
-$ffmpegPath = ".\ffmpeg.exe"
+$whisperPath = ".\faster-whisper-xxl.exe"
 
-# Create the output base directory if it doesn't exist
-if (-not (Test-Path -Path $rootPath)) {
-    Write-Host "Creating directory: $rootPath"
-    New-Item -Path $rootPath -ItemType Directory
+# Create the Transcription directory if it doesn't exist
+function Create-TranscriptionFolder {
+    param (
+        [string]$directoryPath
+    )
+
+    $transcriptionPath = Join-Path -Path $directoryPath -ChildPath "Transcription"
+    if (-not (Test-Path -Path $transcriptionPath)) {
+        Write-Log "Creating directory: $transcriptionPath"
+        New-Item -Path $transcriptionPath -ItemType Directory
+    }
 }
 
+# Run Whisper on all .ogg files in the directory
+function Run-Whisper {
+    param (
+        [string]$directoryPath
+    )
+
+    Write-Log "Starting transcription in directory: $directoryPath..."
+    & $whisperPath --beep_off --output_format txt --language=en --model=tiny.en -o="$directoryPath\Transcription" --batch_recursive --vad_filter=false "$directoryPath"
+    Write-Log "Transcription completed in directory: $directoryPath."
+}
+
+# Check if the directory contains any .ogg files
+function HasOggFiles {
+    param (
+        [string]$directoryPath
+    )
+
+    return (Get-ChildItem -Path $directoryPath -Filter "*.ogg" -File).Count -gt 0
+}
 
 # Process each directory and its subdirectories
 function Process-Directory {
@@ -19,63 +56,24 @@ function Process-Directory {
         [string]$directoryPath
     )
 
-    Write-Host "Processing directory: $directoryPath"
+    Write-Log "Processing directory: $directoryPath"
 
-    # Define paths for the transcription directory
-    $transcriptionPath = Join-Path -Path $directoryPath -ChildPath "Transcription"
-    if (-not (Test-Path -Path $transcriptionPath)) {
-        Write-Host "Creating directory: $transcriptionPath"
-        New-Item -Path $transcriptionPath -ItemType Directory
+    if (-not (HasOggFiles -directoryPath $directoryPath)) {
+        Write-Log "No .ogg files found in directory: $directoryPath. Skipping renaming."
+        return
     }
 
-    # Convert all audio files to WAV format in the current directory if they are not already WAV
-    Write-Host "Starting audio conversion to WAV in directory: $directoryPath..."
-    $audioFiles = Get-ChildItem -Path $directoryPath -File -Recurse | Where-Object { $_.Extension -ne ".txt" }
-    foreach ($audioFile in $audioFiles) {
-        if ($audioFile.Extension -ne ".wav") {
-            $wavFilePath = [System.IO.Path]::ChangeExtension($audioFile.FullName, ".wav")
-
-            # Run ffmpeg to convert files to WAV
-            & $ffmpegPath -i $audioFile.FullName -c:a pcm_s16le -ar 44100 $wavFilePath
-            Write-Host "Converted file: $($audioFile.FullName) to $wavFilePath"
-
-            # Optionally delete the original audio file if not needed
-            Remove-Item -Path $audioFile.FullName -Force
-            Write-Host "Deleted original file: $($audioFile.FullName)"
-        } else {
-            Write-Host "File is already in WAV format: $($audioFile.FullName)"
-        }
-    }
-
-    # Convert all WAV files to OGG Vorbis 32k in the current directory
-    Write-Host "Starting audio conversion to OGG Vorbis 32k in directory: $directoryPath..."
-    $wavFiles = Get-ChildItem -Path $directoryPath -File -Recurse | Where-Object { $_.Extension -eq ".wav" }
-    foreach ($wavFile in $wavFiles) {
-        $oggFilePath = [System.IO.Path]::ChangeExtension($wavFile.FullName, ".ogg")
-
-        # Run ffmpeg to convert files to OGG Vorbis 32k with normalization
-        & $ffmpegPath -i $wavFile.FullName -af "volume=-4.5dB" -c:a libvorbis -b:a 32k $oggFilePath
-        Write-Host "Converted file: $($wavFile.FullName) to $oggFilePath with normalization to -4.5 dB"
-
-        # Optionally delete the original WAV file if not needed
-        Remove-Item -Path $wavFile.FullName -Force
-        Write-Host "Deleted WAV file: $($wavFile.FullName)"
-    }
-
-    Write-Host "Audio conversion completed in directory: $directoryPath."
-
-    # Run the Whisper command for the current directory
-    Write-Host "Starting transcription in directory: $directoryPath..."
-    & ".\faster-whisper-xxl.exe" --beep_off --output_format txt --language=en --model=tiny.en -o="$transcriptionPath" --batch_recursive --vad_filter=false "$directoryPath"
-    Write-Host "Transcription completed in directory: $directoryPath."
+    Create-TranscriptionFolder -directoryPath $directoryPath
+    Run-Whisper -directoryPath $directoryPath
 
     # Initialize counter for blank filenames
     $blankCounter = 1
 
     # Get all transcription text files in the transcription directory
+    $transcriptionPath = Join-Path -Path $directoryPath -ChildPath "Transcription"
     $textFiles = Get-ChildItem -Path $transcriptionPath -Filter "*.txt"
     foreach ($textFile in $textFiles) {
-        Write-Host "Processing transcription file: $($textFile.FullName)"
+        Write-Log "Processing transcription file: $($textFile.FullName)"
         
         # Read the content of the transcription text file
         $transcriptionLines = Get-Content -Path $textFile.FullName
@@ -111,22 +109,18 @@ function Process-Directory {
 
             # Rename the audio file
             Rename-Item -Path $audioFile.FullName -NewName $newFilePath -Force
-            Write-Host "Renamed file: $($audioFile.FullName) to $newFilePath"
-
-            # Remove the transcription text file
-            Remove-Item -Path $textFile.FullName -Force
-            Write-Host "Removed transcription file: $($textFile.FullName)"
+            Write-Log "Renamed file: $($audioFile.FullName) to $newFilePath"
         } else {
-            Write-Host "No matching ogg file found for transcription file: $($textFile.FullName)"
+            Write-Log "No matching ogg file found for transcription file: $($textFile.FullName)"
         }
     }
 
     # Delete the Transcription folder for the current directory
-    Write-Host "Deleting folder: $transcriptionPath"
+    Write-Log "Deleting folder: $transcriptionPath"
     Remove-Item -Path $transcriptionPath -Recurse -Force
-    Write-Host "Folder deleted."
+    Write-Log "Folder deleted."
 
-    Write-Host "Completed processing for directory: $directoryPath."
+    Write-Log "Completed processing for directory: $directoryPath."
 }
 
 # Process the root directory itself
@@ -138,15 +132,9 @@ foreach ($directory in $directories) {
     Process-Directory -directoryPath $directory.FullName
 }
 
-Write-Host ""
-Write-Host "####################################################"
-Write-Host ""
-Write-Host "All audio files compressed, normalized, and renamed."
-Write-Host ""
-Write-Host "####################################################"
-
-# Beep to indicate completion
-[console]::beep(400, 250)  # 1000 Hz frequency, 500 ms duration
-[console]::beep(400, 250)  # 1000 Hz frequency, 500 ms duration
-
-Stop-Transcript
+Write-Log ""
+Write-Log "####################################################"
+Write-Log ""
+Write-Log "All audio files transcribed and renamed."
+Write-Log ""
+Write-Log "####################################################"
