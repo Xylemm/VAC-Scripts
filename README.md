@@ -1,18 +1,43 @@
-# VAC-Scripts
-Voice-Acted Colonists (Scripts for Modders)
+# Scripts for Voice-Acted Colonists
 
 This is a set of tools modders can use to help them build new voicepacks for the Voice-Acted Colonists Rimworld mod
 
-It includes my Icewind Dale voicepack as an example
+### Voice Line Renamer-Converter
 
-How to use the voicepack:
--
-1. Download the zip of this repo
-2. Unzip into your local mods folder
-3. Double click "GenerateDefs.bat". This generates all of the SoundDefs and VoicePackDefs you need to run my voicepack.
-4. Activate Voice-Acted Colonists: Icewind Dale in your Rimworld game to try out the voicepack
+When working with voice lines, you will often have folders filled with hundreds of unlabeled audio files. It can be very tedious to listen to each one before sorting them into the approriate folder.
 
-How to use it with your own voicepack:
+This tool uses OpenAI Whisper to transcribe an entire folder and subfolders full of audio files, then rename each file to the voice line itself. So if a file named "gl330h41.ogg" contains the line "They'll never see us coming!", this tool will rename that file to "Theyll_never_see_us_coming!.ogg".
+
+Now you can quickly look over your list of files and move them to the correct folder.
+
+At the same time, it will convert the files to .ogg format to reduce file sizes without losing quality. It will also normalize the volume so it isn't too loud or too soft.
+
+<details>
+<summary><h2>How to use the Renamer</h2></summary>
+ -
+First, you'll need to download a specific version of Whisper: https://github.com/Purfview/whisper-standalone-win
+
+Be aware that this download is over 1GB compressed, and almost 4GB when unzipped
+
+Extract the downloaded Faster-Whisper-XXL
+
+Place the contents of the "RenameAudio" folder in the folder which contains Faster-Whisper-XXL.exe
+
+Copy your voice line audio files into the RenameThese folder
+
+Make sure you close any audio players or anything that might be using these files
+
+Run "RenameAudio.bat"
+
+This will rename and convert all audio files in the Transcribe folder and any subfolders within it
+
+Audio files that are shorter than one or two seconds, as well as some files that only contain grunts but no actual words, will be renamed with a number (1.ogg, 2.ogg, etc)
+
+If you have an Nvidia GPU, Whisper will use it to process your files very quickly. However, AMD GPUs are not supported. If you have an AMD GPU, your CPU will be used instead. With my CPU (i9 12900K), this will process about 70 voice lines per minute.
+</details>
+
+
+How to use this with your voicepack:
 -
 1. Your file structure MUST be the same as this voicepack. This is also the same structure as the DirtyBomb voicepack.
 2. Sounds/VAC/Project is the project folder. Name your project folder whatever you like.

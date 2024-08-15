@@ -17,13 +17,13 @@ Be aware that this download is over 1GB compressed, and almost 4GB when unzipped
 
 Extract the downloaded Faster-Whisper-XXL
 
-Place the contents of the "Renamer" folder in the folder which contains Faster-Whisper-XXL.exe
+Place the contents of the "RenameAudio" folder in the folder which contains Faster-Whisper-XXL.exe
 
 Copy your voice line audio files into the RenameThese folder
 
 Make sure you close any audio players or anything that might be using these files
 
-Run "Renamer.bat"
+Run "RenameAudio.bat"
 
 This will rename and convert all audio files in the Transcribe folder and any subfolders within it
 
