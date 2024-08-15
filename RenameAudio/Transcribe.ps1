@@ -1,12 +1,17 @@
-﻿# Define paths
+﻿Start-Transcript -Path "log.txt"
+
+Write-Host "All output being saved to log.txt"
+
+# Define paths
 $rootPath = ".\RenameThese"
-$ffmpegPath = ".\ffmpeg\ffmpeg.exe"
+$ffmpegPath = ".\ffmpeg.exe"
 
 # Create the output base directory if it doesn't exist
 if (-not (Test-Path -Path $rootPath)) {
     Write-Host "Creating directory: $rootPath"
     New-Item -Path $rootPath -ItemType Directory
 }
+
 
 # Process each directory and its subdirectories
 function Process-Directory {
@@ -25,7 +30,7 @@ function Process-Directory {
 
     # Convert all audio files to WAV format in the current directory if they are not already WAV
     Write-Host "Starting audio conversion to WAV in directory: $directoryPath..."
-    $audioFiles = Get-ChildItem -Path $directoryPath -File | Where-Object { $_.Extension -ne ".txt" }
+    $audioFiles = Get-ChildItem -Path $directoryPath -File -Recurse | Where-Object { $_.Extension -ne ".txt" }
     foreach ($audioFile in $audioFiles) {
         if ($audioFile.Extension -ne ".wav") {
             $wavFilePath = [System.IO.Path]::ChangeExtension($audioFile.FullName, ".wav")
@@ -44,18 +49,18 @@ function Process-Directory {
 
     # Convert all WAV files to OGG Vorbis 32k in the current directory
     Write-Host "Starting audio conversion to OGG Vorbis 32k in directory: $directoryPath..."
-    $wavFiles = Get-ChildItem -Path $directoryPath -File | Where-Object { $_.Extension -eq ".wav" }
+    $wavFiles = Get-ChildItem -Path $directoryPath -File -Recurse | Where-Object { $_.Extension -eq ".wav" }
     foreach ($wavFile in $wavFiles) {
-    $oggFilePath = [System.IO.Path]::ChangeExtension($wavFile.FullName, ".ogg")
+        $oggFilePath = [System.IO.Path]::ChangeExtension($wavFile.FullName, ".ogg")
 
-    # Run ffmpeg to convert files to OGG Vorbis 32k with normalization
-    & $ffmpegPath -i $wavFile.FullName -af "volume=-4.5dB" -c:a libvorbis -b:a 32k $oggFilePath
-    Write-Host "Converted file: $($wavFile.FullName) to $oggFilePath with normalization to -4.5 dB"
+        # Run ffmpeg to convert files to OGG Vorbis 32k with normalization
+        & $ffmpegPath -i $wavFile.FullName -af "volume=-4.5dB" -c:a libvorbis -b:a 32k $oggFilePath
+        Write-Host "Converted file: $($wavFile.FullName) to $oggFilePath with normalization to -4.5 dB"
 
-    # Optionally delete the original WAV file if not needed
-    Remove-Item -Path $wavFile.FullName -Force
-    Write-Host "Deleted WAV file: $($wavFile.FullName)"
-}
+        # Optionally delete the original WAV file if not needed
+        Remove-Item -Path $wavFile.FullName -Force
+        Write-Host "Deleted WAV file: $($wavFile.FullName)"
+    }
 
     Write-Host "Audio conversion completed in directory: $directoryPath."
 
@@ -81,7 +86,6 @@ function Process-Directory {
         $cleanedText = $cleanedText.Trim() # Remove any leading or trailing whitespace
         $cleanedText = $cleanedText.Substring(0, [Math]::Min(100, $cleanedText.Length)) # Limit length to avoid excessively long names
         $cleanedText = $cleanedText -replace '\.$', '' # Remove trailing "." character if present
-
 
         # If cleaned text is empty, create a unique default name
         if (-not $cleanedText) {
@@ -134,13 +138,15 @@ foreach ($directory in $directories) {
     Process-Directory -directoryPath $directory.FullName
 }
 
-Write-host ""
-Write-host "####################################################"
-Write-host ""
+Write-Host ""
+Write-Host "####################################################"
+Write-Host ""
 Write-Host "All audio files compressed, normalized, and renamed."
-Write-host ""
-Write-host "####################################################"
+Write-Host ""
+Write-Host "####################################################"
 
 # Beep to indicate completion
 [console]::beep(400, 250)  # 1000 Hz frequency, 500 ms duration
 [console]::beep(400, 250)  # 1000 Hz frequency, 500 ms duration
+
+Stop-Transcript
