@@ -7,6 +7,20 @@ if (-not (Test-Path -Path $outputPath)) {
     New-Item -Path $outputPath -ItemType Directory -Force
 }
 
+# Function to sanitize file names
+function Sanitize-FileName {
+    param (
+        [string]$fileName
+    )
+    # Replace spaces with underscores and remove punctuation
+    $sanitized = $fileName -replace '[\s]', '_' -replace '[^\w_]', ''
+    # Truncate file name to 30 characters
+    if ($sanitized.Length -gt 30) {
+        $sanitized = $sanitized.Substring(0, 30)
+    }
+    return $sanitized
+}
+
 # Process each project directory (e.g., IcewindDale)
 foreach ($project in Get-ChildItem -Path $soundsPath -Directory) {
     $projectPath = $project.FullName
@@ -19,6 +33,21 @@ foreach ($project in Get-ChildItem -Path $soundsPath -Directory) {
         foreach ($voice in Get-ChildItem -Path $genderPath -Directory) {
             $voicePath = $voice.FullName
             $voiceName = $voice.Name
+
+            # Sanitize file names in the action directories
+            foreach ($action in @("Attack", "Select", "Move", "Death", "Downed")) {
+                $actionPath = Join-Path -Path $voicePath -ChildPath $action
+
+                if (Test-Path -Path $actionPath) {
+                    $oggFiles = Get-ChildItem -Path $actionPath -Filter *.ogg
+
+                    foreach ($file in $oggFiles) {
+                        $sanitizedName = Sanitize-FileName -fileName $file.BaseName
+                        $sanitizedFilePath = Join-Path -Path $actionPath -ChildPath "$sanitizedName.ogg"
+                        Rename-Item -Path $file.FullName -NewName $sanitizedFilePath -Force
+                    }
+                }
+            }
 
             # Initialize the XML content
             $xmlContent = @("<Defs>")
