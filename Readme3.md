@@ -24,7 +24,7 @@ Two tools are included:
 
 6. Run "RenameAudio.bat"
 
-This will rename and convert all audio files in the RenameThese folder and any subfolders within it
+All audio files in the RenameThese folder and any subfolders will be renamed and converted
 
 Audio files that are shorter than one or two seconds, as well as some files that only contain grunts but no actual words, will be renamed with a number (1.ogg, 2.ogg, etc)
 
@@ -34,17 +34,19 @@ If you have an Nvidia GPU, Whisper will use it to process your files very quickl
 <details>
 <summary><h2>How to use the Def Generator</h2></summary>
 
-1. Your file structure MUST be the same as this voicepack.
+1. Extract the GenerateDefs folder
 
-2. Sounds/VAC/YourProjectName is the project folder. Name your project folder whatever you like.
+2. Your file structure MUST be the same as this voicepack
 
-3. Put your voices in the Male and Female folders
+3. Sounds/VAC/YourProjectName is the project folder. Name your project folder whatever you like.
 
-4. Put your sound files in Attack, Select, Move, Downed, and Death folders
+4. Put your voices in the Male and Female folders
 
-5. Double click "GenerateDefs.bat". This automatically generates all of the SoundDefs and VoicePackDefs for your mod.
+5. Put your sound files in Attack, Select, Move, Downed, and Death folders
 
-6. Make sure you delete the .bat and .ps1 files before uploading your voicepack to Steam
+6. Double click "GenerateDefs.bat". This automatically generates all of the SoundDefs and VoicePackDefs for your mod.
+
+7. Make sure you delete the .bat and .ps1 files before uploading your voicepack to Steam
 
 Here's how it works (and doesn't work):
 -
