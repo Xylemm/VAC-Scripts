@@ -11,34 +11,30 @@ Two tools are included:
 <details>
 <summary><h2>How to use the Renamer</h2></summary>
  -
-First, you'll need to download a specific version of Whisper: https://github.com/Purfview/whisper-standalone-win
+1. Download a specific version of Whisper: https://github.com/Purfview/whisper-standalone-win. Be aware that this download is over 1GB compressed, and almost 4GB when unzipped
 
-Be aware that this download is over 1GB compressed, and almost 4GB when unzipped
+2. Extract the downloaded Faster-Whisper-XXL
 
-Extract the downloaded Faster-Whisper-XXL
+3. Place the contents of the "RenameAudio" folder in the folder which contains Faster-Whisper-XXL.exe
 
-Place the contents of the "RenameAudio" folder in the folder which contains Faster-Whisper-XXL.exe
+4. Copy your voice line audio files into the RenameThese folder
 
-Copy your voice line audio files into the RenameThese folder
+5. Make sure you close any audio players or anything that might be using these files
 
-Make sure you close any audio players or anything that might be using these files
+6. Run "RenameAudio.bat"
 
-Run "RenameAudio.bat"
-
-This will rename and convert all audio files in the Transcribe folder and any subfolders within it
+This will rename and convert all audio files in the RenameThese folder and any subfolders within it
 
 Audio files that are shorter than one or two seconds, as well as some files that only contain grunts but no actual words, will be renamed with a number (1.ogg, 2.ogg, etc)
 
-If you have an Nvidia GPU, Whisper will use it to process your files very quickly. However, AMD GPUs are not supported. If you have an AMD GPU, your CPU will be used instead. With my CPU (i9 12900K), this will process about 70 voice lines per minute.
+If you have an Nvidia GPU, Whisper will use it to process your files very quickly. If you have an AMD GPU, your CPU will be used instead. With my CPU (i9 12900K), this will process about 70 voice lines per minute.
 </details>
-
-It also includes my Icewind Dale voicepack as an example
 
 <details>
 <summary><h2>How to use the Def Generator</h2></summary>
 -
-1. Your file structure MUST be the same as this voicepack. This is also the same structure as the DirtyBomb voicepack.
-2. Sounds/VAC/Project is   the project folder. Name your project folder whatever you like.
+1. Your file structure MUST be the same as this voicepack.
+2. Sounds/VAC/YourProjectName is the project folder. Name your project folder whatever you like.
 3. Put your voices in the Male and Female folders
 4. Put your sound files in Attack, Select, Move, Downed, and Death folders
 5. Double click "GenerateDefs.bat". This automatically generates all of the SoundDefs and VoicePackDefs for your mod.
