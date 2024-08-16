@@ -1,4 +1,15 @@
-﻿# Define the log file path
+﻿# Define paths
+$rootPath = ".\RenameThese"
+$ffmpegPath = ".\ffmpeg.exe"
+$fasterWhisperPath = ".\faster-whisper-xxl.exe"
+
+# Check if the faster-whisper-xxl.exe file exists
+if (-Not (Test-Path -Path $fasterWhisperPath)) {
+    Write-Host "faster-whisper-xxl.exe not found in the current directory. Exiting script."
+    exit
+}
+
+# Define the log file path
 $logFilePath = "RenameAudio.log"
 
 # Remove the existing log file if it exists
@@ -9,38 +20,116 @@ if (Test-Path -Path $logFilePath) {
     Write-Host "Log file does not exist, creating a new one."
 }
 
-# Define a function to write messages to the log file
+# Define a function to write messages to the log file and console
 function Write-Log {
     param (
         [string]$message
     )
-    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
-    "$timestamp - $message" | Out-File -FilePath $logFilePath -Append
+    $timestamp = (Get-Date).ToString("yy-M-d H:m")
+    $logMessage = "$timestamp - $message"
+    
+    # Write to the log file
+    $logMessage | Out-File -FilePath $logFilePath -Append
+    
+    # Also write to the console
+    Write-Host $logMessage
 }
 
-# Define paths
-$rootPath = ".\RenameThese"
-$ffmpegPath = ".\ffmpeg.exe"
+# Define a function to sanitize filenames
+function Sanitize-Filename {
+    param (
+        [string]$filename
+    )
 
-# Create the output base directory if it doesn't exist
-if (-not (Test-Path -Path $rootPath)) {
-    Write-Log "Creating directory: $rootPath"
-    New-Item -Path $rootPath -ItemType Directory
-} else {
-    Write-Log "Directory already exists: $rootPath"
+    # Remove special characters and replace spaces with underscores
+    $sanitized = $filename -replace '[^a-zA-Z0-9_\.\-]', '' -replace '\s+', '_'
+
+    # Limit the filename length to 50 characters (excluding extension)
+    if ($sanitized.Length -gt 50) {
+        $sanitized = $sanitized.Substring(0, 50)
+    }
+
+    return $sanitized
 }
 
-# Process each directory and its subdirectories
+# Define the base path for relative paths
+$basePath = "C:\VoiceLines\Tools\Faster-Whisper-XXL\RenameThese"
+
+# Initialize the directories arrays
+$directories = @()
+$nonEmptyDirectories = @()
+
+# Add the base directory to the directories array
+$directories += $basePath
+
+# Add all directories and subdirectories to the directories array recursively
+$directories += Get-ChildItem -Path $basePath -Directory -Recurse | ForEach-Object { $_.FullName }
+
+# Output the list of directories
+Write-Log "Checking the following folders:"
+Write-Log ""
+
+# Adjust paths to be relative to the base path and replace base path with 'RenameThese'
+$directories | ForEach-Object {
+    $relativePath = $_.Substring($basePath.Length).TrimStart('\')
+    $relativePath = "RenameThese" + ($relativePath -replace "^", "\")
+    Write-Log "\$relativePath"
+}
+
+# Check each directory for emptiness and count files
+foreach ($dir in $directories) {
+    $files = Get-ChildItem -Path $dir -File -Force
+    if ($files.Count -eq 0) {
+        $relativePath = $dir.Substring($basePath.Length).TrimStart('\')
+        $relativePath = "RenameThese" + ($relativePath -replace "^", "\")
+    } else {
+        # Add non-empty directories to the array
+        $nonEmptyDirectories += [PSCustomObject]@{ Path = $dir; FileCount = $files.Count }
+    }
+}
+    
+    Write-Log ""
+    Write-Log "------------------------"
+
+# Adjust paths to be relative to the base path and replace base path with 'RenameThese'
+$nonEmptyDirectories | ForEach-Object {
+    $relativePath = $_.Path.Substring($basePath.Length).TrimStart('\')
+    $relativePath = "RenameThese" + ($relativePath -replace "^", "\")
+    Write-Log ""
+    Write-Log "\$relativePath contains $($_.FileCount) files"
+}
+
+Write-Log ""
+Write-Log "------------------------"
+Write-Log ""
+
+# Rename and sanitize filenames
+function Rename-AudioFiles {
+    param (
+        [string]$directoryPath
+    )
+
+    $audioFiles = Get-ChildItem -Path $directoryPath -File | Where-Object { $_.Extension -ne ".txt" }
+    foreach ($audioFile in $audioFiles) {
+        $newFilename = Sanitize-Filename -filename $audioFile.BaseName
+        $newFilePath = Join-Path -Path $audioFile.DirectoryName -ChildPath "$newFilename$($audioFile.Extension)"
+
+        if ($audioFile.FullName -ne $newFilePath) {
+            Rename-Item -Path $audioFile.FullName -NewName $newFilePath
+        } else {
+        }
+    }
+}
+
+# Convert audio files to WAV format
 function Convert-ToWav {
     param (
         [string]$directoryPath
     )
 
-    Write-Log "Processing directory: $directoryPath"
+    Write-Log "Converting to WAV in directory: $directoryPath"
 
-    # Convert all audio files to WAV format in the current directory if they are not already WAV
-    Write-Log "Starting audio conversion to WAV in directory: $directoryPath..."
-    $audioFiles = Get-ChildItem -Path $directoryPath -File -Recurse | Where-Object { $_.Extension -ne ".txt" }
+    $audioFiles = Get-ChildItem -Path $directoryPath -File | Where-Object { $_.Extension -ne ".txt" }
     foreach ($audioFile in $audioFiles) {
         if ($audioFile.Extension -ne ".wav") {
             $wavFilePath = [System.IO.Path]::ChangeExtension($audioFile.FullName, ".wav")
@@ -58,16 +147,18 @@ function Convert-ToWav {
         }
     }
 
-    Write-Log "Audio conversion to WAV completed in directory: $directoryPath."
 }
 
-# Process the root directory itself
-Convert-ToWav -directoryPath $rootPath
-
-# Process each subdirectory under the root path
-$directories = Get-ChildItem -Path $rootPath -Directory -Recurse
+# Process all directories
 foreach ($directory in $directories) {
-    Convert-ToWav -directoryPath $directory.FullName
+    $itemsInDirectory = Get-ChildItem -Path $directory
+
+    if ($itemsInDirectory.Count -eq 0) {
+        continue
+    }
+
+    Rename-AudioFiles -directoryPath $directory
+    Convert-ToWav -directoryPath $directory
 }
 
 Write-Log ""
@@ -76,5 +167,3 @@ Write-Log ""
 Write-Log "All audio files converted to WAV format."
 Write-Log ""
 Write-Log "####################################################"
-
-Write-Host "Logging complete. Check $logFilePath for details."

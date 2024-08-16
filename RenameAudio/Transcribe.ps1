@@ -1,21 +1,47 @@
 ﻿# Define the log file path
 $logFilePath = "RenameAudio.log"
 
-# Define a logging function
-function Write-Log {
-    param (
-        [string]$Message
-    )
-    
-    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
-    "$timestamp - $Message" | Out-File -FilePath $logFilePath -Append
+$fasterWhisperPath = ".\faster-whisper-xxl.exe"
+
+# Check if the faster-whisper-xxl.exe file exists
+if (-Not (Test-Path -Path $fasterWhisperPath)) {
+    Write-Host "faster-whisper-xxl.exe not found in the current directory. Exiting script."
+    exit
 }
 
-Write-Log "Starting script execution"
+# Define a function to write messages to the log file and console
+function Write-Log {
+    param (
+        [string]$message
+    )
+    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+    $logMessage = "$timestamp - $message"
+    
+    # Write to the log file
+    $logMessage | Out-File -FilePath $logFilePath -Append
+    
+    # Also write to the console
+    Write-Host $logMessage
+}
+
+Write-Log "Starting Transcription"
 
 # Define paths
 $rootPath = ".\RenameThese"
 $whisperPath = ".\faster-whisper-xxl.exe"
+$ffmpegPath = ".\ffmpeg.exe"
+$basePath = "C:\VoiceLines\Tools\Faster-Whisper-XXL\RenameThese"
+
+# Initialize the directories arrays
+$nonEmptyDirectories = @()
+
+# Get all directories and subdirectories, then check each for files
+$directories = Get-ChildItem -Path $basePath -Directory -Recurse | ForEach-Object {
+    $files = Get-ChildItem -Path $_.FullName -File -Force
+    if ($files.Count -gt 0) {
+        $nonEmptyDirectories += [PSCustomObject]@{ Path = $_.FullName; FileCount = $files.Count }
+    }
+}
 
 # Create the Transcription directory if it doesn't exist
 function Create-TranscriptionFolder {
@@ -25,7 +51,6 @@ function Create-TranscriptionFolder {
 
     $transcriptionPath = Join-Path -Path $directoryPath -ChildPath "Transcription"
     if (-not (Test-Path -Path $transcriptionPath)) {
-        Write-Log "Creating directory: $transcriptionPath"
         New-Item -Path $transcriptionPath -ItemType Directory
     }
 }
@@ -78,12 +103,15 @@ function Process-Directory {
         # Read the content of the transcription text file
         $transcriptionLines = Get-Content -Path $textFile.FullName
         $transcriptionText = $transcriptionLines -join ' ' # Combine lines into a single string
-
+    
         # Remove any timestamp patterns and extra content
         $cleanedText = $transcriptionText -replace '\[.*?\]', '' # Remove timestamps enclosed in brackets
         $cleanedText = $cleanedText.Trim() # Remove any leading or trailing whitespace
         $cleanedText = $cleanedText.Substring(0, [Math]::Min(100, $cleanedText.Length)) # Limit length to avoid excessively long names
         $cleanedText = $cleanedText -replace '\.$', '' # Remove trailing "." character if present
+
+        # Replace question marks with tilde symbol
+        $cleanedText = $cleanedText -replace '[\\/:*?"<>|]', '~'
 
         # If cleaned text is empty, create a unique default name
         if (-not $cleanedText) {
@@ -115,21 +143,17 @@ function Process-Directory {
         }
     }
 
-    # Delete the Transcription folder for the current directory
-    Write-Log "Deleting folder: $transcriptionPath"
-    Remove-Item -Path $transcriptionPath -Recurse -Force
-    Write-Log "Folder deleted."
+    # Comment out or remove the code that deletes the Transcription folder
+    # Write-Log "Deleting folder: $transcriptionPath"
+    # Remove-Item -Path $transcriptionPath -Recurse -Force
+    # Write-Log "Folder deleted."
 
     Write-Log "Completed processing for directory: $directoryPath."
 }
 
-# Process the root directory itself
-Process-Directory -directoryPath $rootPath
-
-# Process each subdirectory under the root path
-$directories = Get-ChildItem -Path $rootPath -Directory -Recurse
-foreach ($directory in $directories) {
-    Process-Directory -directoryPath $directory.FullName
+# Process only the non-empty directories
+foreach ($dir in $nonEmptyDirectories) {
+    Process-Directory -directoryPath $dir.Path
 }
 
 Write-Log ""
@@ -138,3 +162,6 @@ Write-Log ""
 Write-Log "All audio files transcribed and renamed."
 Write-Log ""
 Write-Log "####################################################"
+Write-Host "Logging complete. Check $logFilePath for details."
+[console]::beep(550, 250)
+[console]::beep(550, 250)
