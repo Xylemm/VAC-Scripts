@@ -52,8 +52,8 @@ The Transcription folders will be left for debugging purposes.
 
 7. Make sure you delete the .bat and .ps1 files before uploading your voicepack to Steam
 
-Here's how it works (and doesn't work):
--
+### Here's how it works (and doesn't work):
+
 It scans for all sound files in the Sounds/VAC/Project/Gender/Voice/Action folders. It adds appropriate defs for each of these into the SoundDef and VoicePackDef for that voice. If a folder exists that is empty, it does not add a def.
 
 Currently only .ogg files are supported, only Male and Female genders are supported, and only Attack, Select, Move, Downed, and Death actions are supported. All of these can be expanded easily at a later date.
