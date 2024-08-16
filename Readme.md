@@ -32,7 +32,11 @@ If you have an Nvidia GPU, Whisper will use it to process your files very quickl
 
 Question marks are not allowed in Windows file names, and will be replaced with a "~" symbol.
 
+Currently the script shows only a small indicator that it is processing. Later I will add a more complete progress indicator.
+
 The Transcription folders will be left for debugging purposes.
+
+If you run into any problems, send me both of the log files that are generated.
 </details>
 
 <details>
