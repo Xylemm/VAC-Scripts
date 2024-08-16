@@ -1,6 +1,6 @@
 # Scripting Tools for Voice-Acted Colonists
 
-This is a set of tools modders can use to help them build new voicepacks for the <b>Voice-Acted Colonists</b> Rimworld mod
+This is a set of tools modders can use to help them build new voicepacks for the [<b>Voice-Acted Colonists</b>](https://steamcommunity.com/sharedfiles/filedetails/?id=3306119571) Rimworld mod
 
 Two tools are included:
 
