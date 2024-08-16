@@ -1,5 +1,5 @@
 ﻿# Define the log file path
-$logFilePath = "RenameAudio.log"
+$logFilePath = ".\RenameAudio.log"
 
 $fasterWhisperPath = ".\faster-whisper-xxl.exe"
 
@@ -30,7 +30,7 @@ Write-Log "Starting Transcription"
 $rootPath = ".\RenameThese"
 $whisperPath = ".\faster-whisper-xxl.exe"
 $ffmpegPath = ".\ffmpeg.exe"
-$basePath = "C:\VoiceLines\Tools\Faster-Whisper-XXL\RenameThese"
+$basePath = ".\RenameThese"
 
 # Initialize the directories arrays
 $nonEmptyDirectories = @()

@@ -1,12 +1,15 @@
-﻿# Define the log file path
+﻿# Define paths
+$rootPath = ".\RenameThese"
+$ffmpegPath = ".\ffmpeg.exe"
+$fasterWhisperPath = ".\faster-whisper-xxl.exe"
+
+# Define the log file path
 $logFilePath = "RenameAudio.log"
 
 # Ensure the log file exists
 if (-not (Test-Path -Path $logFilePath)) {
     New-Item -Path $logFilePath -ItemType File
 }
-
-$fasterWhisperPath = ".\faster-whisper-xxl.exe"
 
 # Check if the faster-whisper-xxl.exe file exists
 if (-Not (Test-Path -Path $fasterWhisperPath)) {
@@ -29,19 +32,15 @@ function Write-Log {
     Write-Host $logMessage
 }
 
-# Define paths
-$rootPath = ".\RenameThese"
-$ffmpegPath = ".\ffmpeg.exe"
-
 # Define the base path for relative paths
-$basePath = "C:\VoiceLines\Tools\Faster-Whisper-XXL\RenameThese"
+$basePath = ".\RenameThese"
 
 # Initialize the directories arrays
 $directories = @()
 $nonEmptyDirectories = @()
 
 # Add the base directory to the directories array
-$directories += $basePath
+$directories += (Resolve-Path -Path $basePath).Path
 
 # Add all directories and subdirectories to the directories array recursively
 $directories += Get-ChildItem -Path $basePath -Directory -Recurse | ForEach-Object { $_.FullName }
@@ -52,6 +51,7 @@ $directories += Get-ChildItem -Path $basePath -Directory -Recurse | ForEach-Obje
 $directories | ForEach-Object {
     $relativePath = $_.Substring($basePath.Length).TrimStart('\')
     $relativePath = "RenameThese" + ($relativePath -replace "^", "\")
+    Write-Log "$relativePath"
 }
 
 # Check each directory for emptiness and count files
@@ -60,17 +60,18 @@ foreach ($dir in $directories) {
     if ($files.Count -eq 0) {
         $relativePath = $dir.Substring($basePath.Length).TrimStart('\')
         $relativePath = "RenameThese" + ($relativePath -replace "^", "\")
+        Write-Log "$relativePath is empty."
     } else {
         # Add non-empty directories to the array
         $nonEmptyDirectories += [PSCustomObject]@{ Path = $dir; FileCount = $files.Count }
     }
 }
 
-
 # Output non-empty directories
 $nonEmptyDirectories | ForEach-Object {
     $relativePath = $_.Path.Substring($basePath.Length).TrimStart('\')
     $relativePath = "RenameThese" + ($relativePath -replace "^", "\")
+    Write-Log "$relativePath contains $($_.FileCount) files"
 }
 
 Write-Log ""
