@@ -4,12 +4,6 @@ $rootPath = Join-Path -Path $scriptPath -ChildPath "RenameThese"
 $ffmpegPath = Join-Path -Path $scriptPath -ChildPath "ffmpeg.exe"
 $fasterWhisperPath = Join-Path -Path $scriptPath -ChildPath "faster-whisper-xxl.exe"
 
-# Check if the faster-whisper-xxl.exe file exists
-if (-Not (Test-Path -Path $fasterWhisperPath)) {
-    Write-Host "faster-whisper-xxl.exe not found in the current directory. Exiting script."
-    exit
-}
-
 # Define the log file path relative to the script location
 $logFilePath = Join-Path -Path $scriptPath -ChildPath "RenameAudio.log"
 
@@ -36,6 +30,21 @@ function Write-Log {
     Write-Host $logMessage
 }
 
+Write-Log ""
+Write-Log "####################################################"
+Write-Log ""
+Write-Log "Starting audio file converting and renaming"
+Write-Log ""
+Write-Log "RenameAudio.bat version 0.2.5"
+Write-Log ""
+Write-Log "####################################################"
+
+# Check if the faster-whisper-xxl.exe file exists
+if (-Not (Test-Path -Path $fasterWhisperPath)) {
+    Write-Host "faster-whisper-xxl.exe not found in the current directory. Exiting script."
+    exit
+}
+
 # Define a function to sanitize filenames
 function Sanitize-Filename {
     param (
@@ -51,6 +60,34 @@ function Sanitize-Filename {
     }
 
     return $sanitized
+}
+
+# Define a function to rename audio files
+function Rename-AudioFile {
+    param (
+        [string]$directoryPath,
+        [string]$oldFileName,
+        [string]$newFileName
+    )
+    
+    # Construct the full paths
+    $oldFilePath = Join-Path -Path $directoryPath -ChildPath $oldFileName
+    $newFilePath = Join-Path -Path $directoryPath -ChildPath $newFileName
+    
+    if (Test-Path -LiteralPath $oldFilePath) {
+        try {
+            # Rename the file using -LiteralPath to handle special characters like brackets
+            Rename-Item -LiteralPath $oldFilePath -NewName $newFileName -Force
+            Write-Host "File renamed successfully: $oldFilePath to $newFilePath"
+            Write-Log "Renamed file: $oldFilePath to $newFilePath"
+        } catch {
+            Write-Host "Error renaming file: $oldFilePath to $newFilePath. Error: $($_.Exception.Message)"
+            Write-Log "Error renaming file: $oldFilePath to $newFilePath. Error: $($_.Exception.Message)"
+        }
+    } else {
+        Write-Host "File does not exist: $oldFilePath"
+        Write-Log "File does not exist: $oldFilePath"
+    }
 }
 
 # Initialize the directories arrays
@@ -86,8 +123,8 @@ foreach ($dir in $directories) {
     }
 }
     
-    Write-Log ""
-    Write-Log "------------------------"
+Write-Log ""
+Write-Log "------------------------"
 
 # Adjust paths to be relative to the base path and replace base path with 'RenameThese'
 $nonEmptyDirectories | ForEach-Object {
@@ -109,13 +146,9 @@ function Rename-AudioFiles {
 
     $audioFiles = Get-ChildItem -Path $directoryPath -File | Where-Object { $_.Extension -ne ".txt" }
     foreach ($audioFile in $audioFiles) {
-        $newFilename = Sanitize-Filename -filename $audioFile.BaseName
-        $newFilePath = Join-Path -Path $audioFile.DirectoryName -ChildPath "$newFilename$($audioFile.Extension)"
-
-        if ($audioFile.FullName -ne $newFilePath) {
-            Rename-Item -Path $audioFile.FullName -NewName $newFilePath
-        } else {
-        }
+        $sanitizedFileName = Sanitize-Filename -filename $audioFile.BaseName
+        $newFileName = "$sanitizedFileName$($audioFile.Extension)"
+        Rename-AudioFile -directoryPath $directoryPath -oldFileName $audioFile.Name -newFileName $newFileName
     }
 }
 
@@ -144,7 +177,6 @@ function Convert-ToWav {
             Write-Log "File is already in WAV format: $($audioFile.FullName)"
         }
     }
-
 }
 
 # Process all directories

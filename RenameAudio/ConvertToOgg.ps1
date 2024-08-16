@@ -6,17 +6,6 @@ $fasterWhisperPath = ".\faster-whisper-xxl.exe"
 # Define the log file path
 $logFilePath = "RenameAudio.log"
 
-# Ensure the log file exists
-if (-not (Test-Path -Path $logFilePath)) {
-    New-Item -Path $logFilePath -ItemType File
-}
-
-# Check if the faster-whisper-xxl.exe file exists
-if (-Not (Test-Path -Path $fasterWhisperPath)) {
-    Write-Host "faster-whisper-xxl.exe not found in the current directory. Exiting script."
-    exit
-}
-
 # Define a function to write messages to the log file and console
 function Write-Log {
     param (
@@ -30,6 +19,17 @@ function Write-Log {
     
     # Also write to the console
     Write-Host $logMessage
+}
+
+# Ensure the log file exists
+if (-not (Test-Path -Path $logFilePath)) {
+    New-Item -Path $logFilePath -ItemType File
+}
+
+# Check if the faster-whisper-xxl.exe file exists
+if (-Not (Test-Path -Path $fasterWhisperPath)) {
+    Write-Host "faster-whisper-xxl.exe not found in the current directory. Exiting script."
+    exit
 }
 
 # Define the base path for relative paths
