@@ -29,6 +29,10 @@ All audio files in the RenameThese folder and any subfolders will be renamed and
 Audio files that are shorter than one or two seconds, as well as some files that only contain grunts but no actual words, will be renamed with a number (1.ogg, 2.ogg, etc)
 
 If you have an Nvidia GPU, Whisper will use it to process your files very quickly. If you have an AMD GPU, your CPU will be used instead. With my CPU (i9 12900K), this will process about 70 voice lines per minute.
+
+Question marks are not allowed in Windows file names, and will be replaced with a "~" symbol.
+
+The Transcription folders will be left for debugging purposes.
 </details>
 
 <details>
