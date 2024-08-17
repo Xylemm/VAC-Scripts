@@ -1,7 +1,4 @@
-﻿# Define the log file path
-$logFilePath = ".\RenameAudio.log"
-
-# Define a function to write messages to the log file and console
+﻿# Define a function to write messages to the log file and console
 function Write-Log {
     param (
         [string]$message
@@ -18,19 +15,27 @@ function Write-Log {
 
 Write-Log "Starting Transcription"
 
-$fasterWhisperPath = ".\faster-whisper-xxl.exe"
+# Get the absolute path of the script's directory
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
+# Define the log file path
+$logFilePath = Join-Path -Path $scriptDir -ChildPath "RenameAudio.log"
+
+$fasterWhisperPath = Join-Path -Path $scriptDir -ChildPath "faster-whisper-xxl.exe"
+$ffmpegPath = Join-Path -Path $scriptDir -ChildPath "ffmpeg.exe"
 
 # Check if the faster-whisper-xxl.exe file exists
 if (-Not (Test-Path -Path $fasterWhisperPath)) {
-    Write-Host "faster-whisper-xxl.exe not found in the current directory. Exiting script."
+    Write-Log "faster-whisper-xxl.exe not found in the script directory. Exiting script."
     exit
 }
 
+# Log the full path of the Whisper executable
+Write-Log "faster-whisper-xxl.exe path: $fasterWhisperPath"
+Write-Log "ffmpeg.exe path: $ffmpegPath"
+
 # Define paths
-$rootPath = ".\RenameThese"
-$whisperPath = ".\faster-whisper-xxl.exe"
-$ffmpegPath = ".\ffmpeg.exe"
-$basePath = ".\RenameThese"
+$basePath = Join-Path -Path $scriptDir -ChildPath "RenameThese"
 
 # Initialize the directories arrays
 $nonEmptyDirectories = @()
@@ -68,8 +73,22 @@ function Run-Whisper {
     )
 
     Write-Log "Starting transcription in directory: $directoryPath..."
-    & $whisperPath --beep_off --output_format txt --language=en --model=tiny.en -o="$directoryPath\Transcription" --batch_recursive --vad_filter=false "$directoryPath"
-    Write-Log "Transcription completed in directory: $directoryPath."
+
+    $whisperCommand = "& `"$fasterWhisperPath`" --beep_off --output_format txt --language=en --model=tiny.en -o=`"$directoryPath\Transcription`" --batch_recursive --vad_filter=false `"$directoryPath`""
+    Write-Log "Executing command: $whisperCommand"
+
+    # Execute Whisper command and capture error output
+    $process = Start-Process -FilePath $fasterWhisperPath -ArgumentList "--beep_off --output_format txt --language=en --model=tiny.en -o=`"$directoryPath\Transcription`" --batch_recursive --vad_filter=false `"$directoryPath`"" -NoNewWindow -PassThru -RedirectStandardError "$logFilePath"
+
+    # Wait for the process to exit
+    $process.WaitForExit()
+
+    # Check exit code
+    if ($process.ExitCode -ne 0) {
+        Write-Log "Whisper process failed with exit code $($process.ExitCode). Check error log for details."
+    } else {
+        Write-Log "Transcription completed successfully in directory: $directoryPath."
+    }
 }
 
 # Check if the directory contains any .ogg files
@@ -175,5 +194,4 @@ Write-Log "All audio files transcribed and renamed."
 Write-Log ""
 Write-Log "####################################################"
 Write-Host "Logging complete. Check $logFilePath for details."
-[console]::beep(550, 250)
 [console]::beep(550, 250)

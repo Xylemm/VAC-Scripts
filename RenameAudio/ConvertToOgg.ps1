@@ -21,6 +21,15 @@ function Write-Log {
     Write-Host $logMessage
 }
 
+# Count the number of .wav files in \RenameThis and its subfolders
+$renameThesePath = ".\RenameThese"
+if (Test-Path -Path $renameThesePath) {
+    $wavFileCount = (Get-ChildItem -Path $renameThesePath -Filter "*.wav" -File -Recurse).Count
+    Write-Log "There are $oggFileCount .wav files in RenameThese and its subfolders."
+} else {
+    Write-Log "RenameThese directory does not exist."
+}
+
 # Ensure the log file exists
 if (-not (Test-Path -Path $logFilePath)) {
     New-Item -Path $logFilePath -ItemType File
