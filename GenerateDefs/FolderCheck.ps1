@@ -1,6 +1,25 @@
 ﻿# Load the required .NET assembly for popup windows
 Add-Type -AssemblyName System.Windows.Forms
 
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+# Step 1: Move to the current directory
+Set-Location -Path (Get-Location)
+
+# Step 2: Get the script's location
+$scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
+# Step 3: Get the current working directory
+$currentDirectory = Get-Location
+
+# Step 4: Check if the current directory matches the script's location
+if ($currentDirectory.Path -ne $scriptPath) {
+    Write-Host "Error: The script is not running from its own directory." -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Script is running from the correct directory." -ForegroundColor Green
+}
+
 # Define the root directory based on the location of the script
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $soundsPath = "$scriptPath/Sounds"
@@ -19,31 +38,33 @@ if ($soundsContents.Count -ne 1 -or $soundsContents.Name -ne "VAC") {
     exit 1
 }
 
-# Check if the "VAC" folder exists and contains only one subfolder
+# Check if the "VAC" folder exists and contains subfolders
 $vacContents = Get-ChildItem -Path $vacPath -Directory
-if ($vacContents.Count -ne 1) {
-    [System.Windows.Forms.MessageBox]::Show("The 'VAC' folder must contain exactly one subfolder. Exiting script.", "Error", 'OK', 'Error')
+if ($vacContents.Count -eq 0) {
+    [System.Windows.Forms.MessageBox]::Show("The 'VAC' folder must contain at least one subfolder. Exiting script.", "Error", 'OK', 'Error')
     exit 1
 }
 
-# Get the name of the single subfolder inside "VAC"
-$projectName = $vacContents.Name
-$projectPath = "$vacPath/$projectName"
-
-# Check if the "VAC" folder contains only allowed gender folders
+# Check if any of the subfolders in "VAC" contain allowed gender folders
 $allowedGenders = @("Male", "Female", "Any")
-$vacContents = Get-ChildItem -Path $projectPath -Directory | Select-Object -ExpandProperty Name
+$foundValidFolder = $false
 
-# Ensure only allowed gender folders are present and at least one is required
-$invalidFolders = $vacContents | Where-Object { $_ -notin $allowedGenders }
-if ($invalidFolders.Count -gt 0 -or $vacContents.Count -eq 0) {
-    [System.Windows.Forms.MessageBox]::Show("Incorrect folder structure found. Please ensure correct folders exist:
+foreach ($subfolder in $vacContents) {
+    $subfolderPath = $subfolder.FullName
+    $subfolderContents = Get-ChildItem -Path $subfolderPath -Directory | Select-Object -ExpandProperty Name
 
-Sounds\VAC\$projectName\Male
-Sounds\VAC\$projectName\Female
-Sounds\VAC\$projectName\Any
+    # Check if the subfolder contains at least one allowed gender folder
+    $validGenderFolder = $subfolderContents | Where-Object { $_ -in $allowedGenders }
+    
+    if ($validGenderFolder.Count -gt 0) {
+        $foundValidFolder = $true
+        break
+    }
+}
 
-Exiting script.", "Error", 'OK', 'Error')
+# If no valid folder with gender folders was found, display an error and exit
+if (-not $foundValidFolder) {
+    [System.Windows.Forms.MessageBox]::Show("No subfolders in 'VAC' contain the required gender folders (Male, Female, Any). Exiting script.", "Error", 'OK', 'Error')
     exit 1
 }
 
@@ -63,7 +84,7 @@ function Sanitize-Name {
     return $sanitizedName
 }
 
-#Assign a function to detect unique filenames
+# Assign a function to detect unique filenames
 function Get-UniqueFileName {
     param (
         [string]$basePath,
@@ -103,41 +124,40 @@ function Get-UniqueFileName {
     }
 }
 
-
 # Rename files
-Get-ChildItem -Path $projectPath -Recurse -File -Filter "*.*" | ForEach-Object {
-    $originalFilePath = $_.FullName
-    $directory = $_.DirectoryName
-    $fileName = $_.BaseName
-    $fileExtension = $_.Extension
+# Get-ChildItem -Path $projectPath -Recurse -File -Filter "*.*" | ForEach-Object {
+#    $originalFilePath = $_.FullName
+#    $directory = $_.DirectoryName
+#    $fileName = $_.BaseName
+#    $fileExtension = $_.Extension
     
     # Sanitize the filename
-    $sanitizedFileName = Sanitize-Name -name $fileName
+#    $sanitizedFileName = Sanitize-Name -name $fileName
     
     # Generate a unique filename if necessary
-    $newFilePath = Get-UniqueFileName -basePath $directory -fileName $sanitizedFileName -extension $fileExtension
+#    $newFilePath = Get-UniqueFileName -basePath $directory -fileName $sanitizedFileName -extension $fileExtension
     
-    if ($originalFilePath -ne $newFilePath) {
-        Rename-Item -Path $originalFilePath -NewName (Split-Path -Leaf $newFilePath) -Force
-    }
-}
+#    if ($originalFilePath -ne $newFilePath) {
+#        Rename-Item -Path $originalFilePath -NewName (Split-Path -Leaf $newFilePath) -Force
+#    }
+#}
 
 # Rename folders with spaces
-Get-ChildItem -Path $projectPath -Recurse -Directory | ForEach-Object {
-    $originalFolderPath = $_.FullName
-    $parentFolder = $_.Parent.FullName
-    $folderName = $_.Name
+#Get-ChildItem -Path $projectPath -Recurse -Directory | ForEach-Object {
+#    $originalFolderPath = $_.FullName
+#    $parentFolder = $_.Parent.FullName
+#    $folderName = $_.Name
     
     # Sanitize the folder name
-    $sanitizedFolderName = Sanitize-Name -name $folderName
+#    $sanitizedFolderName = Sanitize-Name -name $folderName
     
     # Create the new folder path
-    $newFolderPath = Join-Path -Path $parentFolder -ChildPath $sanitizedFolderName
+#    $newFolderPath = Join-Path -Path $parentFolder -ChildPath $sanitizedFolderName
     
-    if ($originalFolderPath -ne $newFolderPath) {
-        Rename-Item -Path $originalFolderPath -NewName (Split-Path -Leaf $newFolderPath) -Force
-    }
-}
+#   if ($originalFolderPath -ne $newFolderPath) {
+#      Rename-Item -Path $originalFolderPath -NewName (Split-Path -Leaf $newFolderPath) -Force
+#    }
+#}
 
 # If all checks pass, output success message
-Write-Output "Folder structure is correct, and files and folders have been renamed."
+Write-Output "Folder structure is correct" #, and files and folders have been renamed."
